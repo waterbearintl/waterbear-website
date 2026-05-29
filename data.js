@@ -15,14 +15,14 @@ window.SITE_DATA = {
       id: "furniture-hardware",
       name: "Furniture Hardware",
       icon: "🔩",
-      color: "#E8F0FE",
+      color: "#E8F5EE",
       description: "Cabinet hinges, flat plates, brackets, and hardware accessories for furniture manufacturing and construction."
     },
     {
       id: "environmental-tech",
       name: "Environmental Technology",
       icon: "🌱",
-      color: "#E8F5EE",
+      color: "#D4EDE2",
       description: "Eco-friendly products and green technology solutions for a sustainable future."
     }
     // ADD NEW CATEGORIES HERE (copy the block above and edit):
