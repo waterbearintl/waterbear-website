@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waterbear Tech — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0F5E3F;
+  --primary-light: #1A7A54;
+  --accent: #E8F5EE;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --warning: #D97706;
+  --warning-light: #FEF3C7;
+  --text: #1A1A1A;
+  --text-secondary: #5F6368;
+  --text-light: #9AA0A6;
+  --bg: #F7F8FA;
+  --bg-white: #FFFFFF;
+  --border: #E5E7EB;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --transition: 0.2s ease;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+
+/* ========== LOGIN ========== */
+.login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+.login-card { background: white; border-radius: 16px; padding: 48px 40px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+.login-logo { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px; margin-bottom: 24px; }
+.login-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.login-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
+.login-card label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+.login-card input[type="password"] { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; transition: var(--transition); margin-bottom: 20px; }
+.login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,94,63,0.1); }
+.login-card button { width: 100%; padding: 13px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); }
+.login-card button:hover { background: var(--primary-light); }
+.login-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+
+/* ========== LAYOUT ========== */
+.admin-layout { display: none; }
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 240px; background: var(--bg-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; }
+.sidebar-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-logo { display: flex; align-items: center; gap: 10px; }
+.sidebar-logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; }
+.sidebar-logo-text { font-weight: 600; font-size: 14px; }
+.sidebar-logo-text small { font-size: 10px; color: var(--text-light); display: block; }
+.sidebar-nav { flex: 1; padding: 12px; overflow-y: auto; }
+.sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: var(--transition); margin-bottom: 2px; }
+.sidebar-nav a:hover { background: var(--accent); color: var(--primary); }
+.sidebar-nav a.active { background: var(--accent); color: var(--primary); font-weight: 600; }
+.sidebar-nav a .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); }
+.btn-logout { width: 100%; padding: 9px; background: var(--danger-light); color: var(--danger); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); }
+.btn-logout:hover { background: #FECACA; }
+
+.main { margin-left: 240px; padding: 28px 36px 60px; max-width: 1100px; }
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.page-header p { font-size: 14px; color: var(--text-secondary); }
+.page-actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); border: none; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-light); }
+.btn-outline { background: white; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-danger { background: var(--danger-light); color: var(--danger); }
+.btn-danger:hover { background: #FECACA; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+
+/* ========== TABLE ========== */
+.table-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: var(--bg); }
+th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border); }
+td { padding: 12px 16px; border-bottom: 1px solid #F0F1F3; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #FAFBFC; }
+.tag { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+.tag-cat { background: var(--accent); color: var(--primary); }
+.tag-material { background: #EEF2FF; color: #4338CA; }
+.spec-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.spec-tag { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--text-secondary); }
+.action-btns { display: flex; gap: 6px; }
+.action-btns button { padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; font-weight: 500; border: none; transition: var(--transition); }
+.btn-edit { background: var(--accent); color: var(--primary); }
+.btn-edit:hover { background: #C6F6D5; }
+.btn-delete { background: var(--danger-light); color: var(--danger); }
+.btn-delete:hover { background: #FECACA; }
+
+/* ========== MODAL ========== */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
+.modal-header h2 { font-size: 17px; font-weight: 600; }
+.modal-close { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; transition: var(--transition); }
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 16px 24px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text); }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: var(--transition); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,94,63,0.1); }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-hint { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+.specs-input { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.spec-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent); color: var(--primary); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+.spec-chip button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 14px; line-height: 1; padding: 0; }
+.spec-input-row { display: flex; gap: 6px; }
+.spec-input-row input { flex: 1; }
+.spec-input-row button { padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; }
+
+/* ========== EXPORT ========== */
+.export-box { background: white; border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow-sm); text-align: center; max-width: 480px; margin: 0 auto; }
+.export-icon { font-size: 48px; margin-bottom: 16px; }
+.export-box h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.export-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+.export-steps { text-align: left; background: var(--bg); border-radius: 10px; padding: 20px; margin-bottom: 24px; }
+.export-steps h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.export-steps ol { padding-left: 20px; }
+.export-steps li { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.5; }
+.export-btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); }
+.export-btn:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(15,94,63,0.25); }
+
+/* ========== STATS ========== */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
+.stat-num { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ========== TOAST ========== */
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1F2937; color: white; padding: 14px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 2000; opacity: 0; transform: translateY(12px); transition: all 0.3s ease; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 20px 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  table { font-size: 12px; }
+  th, td { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN SCREEN ========== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">WB</div>
+    <h1>Admin Panel</h1>
+    <p>Enter password to manage products and categories.</p>
+    <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+    <label for="passwordInput">Password</label>
+    <input type="password" id="passwordInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') attemptLogin()">
+    <button onclick="attemptLogin()">Sign In</button>
+    <p style="margin-top:20px;font-size:12px;color:#9AA0A6;text-align:center;">Waterbear Tech — Internal Use Only</p>
+  </div>
+</div>
+
+<!-- ========== ADMIN LAYOUT ========== -->
+<div class="admin-layout" id="adminLayout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">WB</div>
+        <div class="sidebar-logo-text">
+          Waterbear Admin
+          <small>Internal Panel</small>
+        </div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="#" data-tab="products" onclick="switchTab('products', this)">
+        <span class="nav-icon">🔩</span> Products
+      </a>
+      <a href="#" data-tab="categories" onclick="switchTab('categories', this)">
+        <span class="nav-icon">📂</span> Categories
+      </a>
+      <a href="#" data-tab="export" onclick="switchTab('export', this)">
+        <span class="nav-icon">📤</span> Export Data
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">🚪 Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main" id="mainContent">
+    <!-- Rendered by JS -->
+  </div>
+</div>
+
+<!-- ========== PRODUCT MODAL ========== -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="productModalTitle">Add Product</h2>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editSku">
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU *</label>
+          <input type="text" id="prodSku" placeholder="e.g. WH999" required>
+        </div>
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="prodName" placeholder="e.g. Steel Cabinet Hinge" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="prodCategory" required>
+            <option value="">Select category...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Material</label>
+          <input type="text" id="prodMaterial" placeholder="e.g. Carbon Steel">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Finish</label>
+        <input type="text" id="prodFinish" placeholder="e.g. Electroplated (Ni/Zn)">
+      </div>
+      <div class="form-group">
+        <label>Specifications</label>
+        <div class="specs-input" id="specsList"></div>
+        <div class="spec-input-row">
+          <input type="text" id="specInput" placeholder="Add a spec, e.g. Φ25">
+          <button onclick="addSpec()">Add</button>
+        </div>
+        <div class="form-hint">Press "Add" or Enter to add each specification.</div>
+      </div>
+      <div class="form-group">
+        <label>Application</label>
+        <textarea id="prodApp" placeholder="e.g. Kitchen cabinets, wardrobes, furniture manufacturing"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeProductModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CATEGORY MODAL ========== -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="catModalTitle">Add Category</h2>
+      <button class="modal-close" onclick="closeCatModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCatId">
+      <div class="form-group">
+        <label>Category ID *</label>
+        <input type="text" id="catId" placeholder="e.g. furniture-hardware" required>
+        <div class="form-hint">Lowercase, no spaces. Use hyphens for separation.</div>
+      </div>
+      <div class="form-group">
+        <label>Category Name *</label>
+        <input type="text" id="catName" placeholder="e.g. Furniture Hardware" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Icon (emoji)</label>
+          <input type="text" id="catIcon" placeholder="e.g. 🔩" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label>Color (hex)</label>
+          <input type="text" id="catColor" placeholder="#E8F0FE" maxlength="7">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="catDesc" placeholder="Brief description of this category"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCatModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div class="toast" id="toast"></div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+// ============================================================
+//  CONFIGURATION
+// ============================================================
+const ADMIN_PASSWORD = "waterbear2026";  // ← Change this password!
+let ADMIN_DATA = null;
+let editingSku = null;
+let editingCatId = null;
+
+// ============================================================
+//  LOGIN
+// ============================================================
+function attemptLogin() {
+  const pw = document.getElementById('passwordInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminLayout').style.display = 'flex';
+    loadData();
+    switchTab('dashboard');
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.display = 'block';
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+
+function logout() {
+  document.getElementById('adminLayout').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('passwordInput').value = '';
+}
+
+// ============================================================
+//  LOAD DATA
+// ============================================================
+function loadData() {
+  // Load from data.js (must be loaded via <script src="data.js">)
+  if (window.SITE_DATA) {
+    ADMIN_DATA = JSON.parse(JSON.stringify(window.SITE_DATA));
+    renderAll();
+  } else {
+    alert('Error: data.js not loaded. Make sure data.js is in the same folder as admin.html.');
+  }
+}
+
+// ============================================================
+//  TAB SWITCHING
+// ============================================================
+function switchTab(tab, el) {
+  document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  const mc = document.getElementById('mainContent');
+  if (tab === 'dashboard') mc.innerHTML = renderDashboard();
+  if (tab === 'products') mc.innerHTML = renderProductsTab();
+  if (tab === 'categories') mc.innerHTML = renderCategoriesTab();
+  if (tab === 'export') mc.innerHTML = renderExportTab();
+}
+
+// ============================================================
+//  DASHBOARD
+// ============================================================
+function renderDashboard() {
+  if (!ADMIN_DATA) return '';
+  const catCount = ADMIN_DATA.categories.length;
+  const prodCount = ADMIN_DATA.products.length;
+  return `
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Overview of your product catalog.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${prodCount}</div><div class="stat-label">Total Products</div></div>
+      <div class="stat-card"><div class="stat-num">${catCount}</div><div class="stat-label">Categories</div></div>
+      <div class="stat-card"><div class="stat-num">${ADMIN_DATA.company.shortName}</div><div class="stat-label">Company</div></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Products</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${ADMIN_DATA.categories.map(cat => `
+            <tr>
+              <td><span class="tag tag-cat">${cat.icon} ${cat.name}</span></td>
+              <td>${ADMIN_DATA.products.filter(p => p.category === cat.id).length} products</td>
+              <td><button class="btn btn-sm btn-outline" onclick="switchTab('products');filterProductsByCat('${cat.id}')">View Products</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// ============================================================
+//  PRODUCTS TAB
+// ============================================================
+let productFilterCat = null;
+
+function renderProductsTab() {
+  if (!ADMIN_DATA) return '';
+  const products = productFilterCat
+    ? ADMIN_DATA.products.filter(p => p.category === productFilterCat)
+    : ADMIN_DATA.products;
+  const cat = productFilterCat ? ADMIN_DATA.categories.find(c => c.id === productFilterCat) : null;
+
+  return `
+    <div class="page-header">
+      <h1>Products ${cat ? `— ${cat.icon} ${cat.name}` : ''}</h1>
+      <p>${productFilterCat ? `<button class="btn btn-sm btn-outline" onclick="productFilterCat=null;renderProductsTab()">← Show All</button> ` : ''}${ADMIN_DATA.products.length} total products</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" onclick="openAddProductModal()">＋ Add Product</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th>Specs</th><th>Material</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${products.map(p => {
+            const c = ADMIN_DATA.categories.find(c => c.id === p.category);
+            return `
+              <tr>
+                <td><strong>${p.sku}</strong></td>
+                <td>${p.name}</td>
+                <td><span class="tag tag-cat">${c ? c.icon : '?'} ${c ? c.name : p.category}</span></td>
+                <td><div class="spec-tags">${p.specs.slice(0,3).map(s => `<span class="spec-tag">${s}</span>`).join('')}${p.specs.length > 3 ? `<span class="spec-tag">+${p.specs.length-3}</span>` : ''}</div></td>
+                <td><span class="tag tag-material">${p.material || '-'}</span></td>
+                <td><div class="action-btns"><button class="btn-edit" onclick="editProduct('${p.sku}')">Edit</button><button class="btn-delete" onclick="deleteProduct('${p.sku}')">Delete</button></div></td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+      ${products.length === 0 ? '<p style="text-align:center;padding:40px;color:#9AA0A6;">No products found.</p>' : ''}
+    </div>
+  `;
+}
+
+function filterProductsByCat(catId) {
+  productFilterCat = catId;
+  renderProductsTab();
+}
+
+// ============================================================
+//  PRODUCT MODAL
+// ============================================================
+function populateCatSelect() {
+  const sel = document.getElementById('prodCategory');
+  sel.innerHTML = '<option value="">Select category...</option>' +
+    ADMIN_DATA.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+}
+
+function openAddProductModal() {
+  editingSku = null;
+  document.getElementById('productModalTitle').textContent = 'Add Product';
+  document.getElementById('editSku').value = '';
+  document.getElementById('prodSku').value = '';
+  document.getElementById('prodSku').disabled = false;
+  document.getElementById('prodName').value = '';
+  document.getElementById('prodMaterial').value = '';
+  document.getElementById('prodFinish').value = '';
+  document.getElementById('prodApp').value = '';
+  document.getElementById('specsList').innerHTML = '';
+  document.getElementById('specInput').value = '';
+  populateCatSelect();
+  document.getElementById('productModal').classList.add('open');
+}
+
+function editProduct(sku) {
+  const p = ADMIN_DATA.products.find(p => p.sku === sku);
+  if (!p) return;
+  editingSku = sku;
+  document.getElementById('productModalTitle').textContent = 'Edit Product';
+  document.getElementById('prodSku').value = p.sku;
+  document.getElementById('prodSku').disabled = true;
+  document.getElementById('prodName').value = p.name;
+  populateCatSelect();
+  document.getElementById('prodCategory').value = p.category;
+  document.getElementById('prodMaterial').value = p.material || '';
+  document.getElementById('prodFinish').value = p.finish || '';
+  document.getElementById('prodApp').value = p.application || '';
+  // Render specs
+  const specsList = document.getElementById('specsList');
+  specsList.innerHTML = (p.specs || []).map(s =>
+    `<span class="spec-chip">${s} <button onclick="this.parentElement.remove()">✕</button></span>`
+  ).join('');
+  document.getElementById('specInput').value = '';
+  document.getElementById('productModal').classList.add('open');
+}
+
+function addSpec() {
+  const input = document.getElementById('specInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const list = document.getElementById('specsList');
+  list.insertAdjacentHTML('beforeend', `<span class="spec-chip">${val} <button onclick="this.parentElement.remove()">✕</button></span>`);
+  input.value = '';
+  input.focus();
+}
+
+function saveProduct() {
+  const sku = document.getElementById('prodSku').value.trim();
+  const name = document.getElementById('prodName').value.trim();
+  const category = document.getElementById('prodCategory').value;
+  if (!sku || !name || !category) { alert('Please fill in SKU, Name, and Category.'); return; }
+
+  const specs = [...document.getElementById('specsList').children].map(el => el.textContent.trim().replace(' ✕',''));
+
+  const product = {
+    sku, name, category,
+    specs: specs.length ? specs : [],
+    material: document.getElementById('prodMaterial').value.trim(),
+    finish: document.getElementById('prodFinish').value.trim(),
+    application: document.getElementById('prodApp').value.trim()
+  };
+
+  if (editingSku) {
+    const idx = ADMIN_DATA.products.findIndex(p => p.sku === editingSku);
+    if (idx !== -1) ADMIN_DATA.products[idx] = product;
+  } else {
+    if (ADMIN_DATA.products.find(p => p.sku === sku)) { alert('SKU already exists!'); return; }
+    ADMIN_DATA.products.push(product);
+  }
+
+  closeProductModal();
+  renderAll();
+  showToast(editingSku ? 'Product updated!' : 'Product added!');
+}
+
+function deleteProduct(sku) {
+  if (!confirm(`Delete product ${sku}? This cannot be undone.`)) return;
+  ADMIN_DATA.products = ADMIN_DATA.products.filter(p => p.sku !== sku);
+  renderAll();
+  showToast('Product deleted.');
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('open');
+}
+
+// ============================================================
+//  CATEGORIES TAB
+// ============================================================
+function renderCategoriesTab() {
+  if (!ADMIN_DATA) return '';
+  return `
+    <div class="page-header">
+      <h1>Categories</h1>
+      <p>${ADMIN_DATA.categories.length} categories, ${ADMIN_DATA.products.length} total products.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-primary" onclick="openAddCatModal()">＋ Add Category</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Icon</th><th>Name</th><th>ID</th><th>Products</th><th>Description</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${ADMIN_DATA.categories.map(cat => `
+            <tr>
+              <td style="font-size:24px;">${cat.icon}</td>
+              <td><strong>${cat.name}</strong></td>
+              <td><code style="font-size:12px;background:#F7F8FA;padding:2px 6px;border-radius:4px;">${cat.id}</code></td>
+              <td>${ADMIN_DATA.products.filter(p => p.category === cat.id).length}</td>
+              <td style="color:#5F6368;font-size:13px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${cat.description || ''}</td>
+              <td><div class="action-btns"><button class="btn-edit" onclick="editCategory('${cat.id}')">Edit</button><button class="btn-delete" onclick="deleteCategory('${cat.id}')">Delete</button></div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openAddCatModal() {
+  editingCatId = null;
+  document.getElementById('catModalTitle').textContent = 'Add Category';
+  document.getElementById('editCatId').value = '';
+  document.getElementById('catId').value = '';
+  document.getElementById('catId').disabled = false;
+  document.getElementById('catName').value = '';
+  document.getElementById('catIcon').value = '🔧';
+  document.getElementById('catColor').value = '#E8F0FE';
+  document.getElementById('catDesc').value = '';
+  document.getElementById('catModal').classList.add('open');
+}
+
+function editCategory(id) {
+  const c = ADMIN_DATA.categories.find(c => c.id === id);
+  if (!c) return;
+  editingCatId = id;
+  document.getElementById('catModalTitle').textContent = 'Edit Category';
+  document.getElementById('catId').value = c.id;
+  document.getElementById('catId').disabled = true;
+  document.getElementById('catName').value = c.name;
+  document.getElementById('catIcon').value = c.icon || '';
+  document.getElementById('catColor').value = c.color || '';
+  document.getElementById('catDesc').value = c.description || '';
+  document.getElementById('catModal').classList.add('open');
+}
+
+function saveCategory() {
+  const id = document.getElementById('catId').value.trim();
+  const name = document.getElementById('catName').value.trim();
+  if (!id || !name) { alert('Please fill in ID and Name.'); return; }
+
+  const cat = {
+    id, name,
+    icon: document.getElementById('catIcon').value || '🔧',
+    color: document.getElementById('catColor').value || '#E8F0FE',
+    description: document.getElementById('catDesc').value.trim()
+  };
+
+  if (editingCatId) {
+    const idx = ADMIN_DATA.categories.findIndex(c => c.id === editingCatId);
+    if (idx !== -1) ADMIN_DATA.categories[idx] = cat;
+  } else {
+    if (ADMIN_DATA.categories.find(c => c.id === id)) { alert('Category ID already exists!'); return; }
+    ADMIN_DATA.categories.push(cat);
+  }
+
+  closeCatModal();
+  renderAll();
+  showToast(editingCatId ? 'Category updated!' : 'Category added!');
+}
+
+function deleteCategory(id) {
+  const count = ADMIN_DATA.products.filter(p => p.category === id).length;
+  if (count > 0) {
+    if (!confirm(`This category has ${count} product(s). Deleting it will orphan those products. Continue?`)) return;
+  } else {
+    if (!confirm(`Delete category "${id}"?`)) return;
+  }
+  ADMIN_DATA.categories = ADMIN_DATA.categories.filter(c => c.id !== id);
+  renderAll();
+  showToast('Category deleted.');
+}
+
+function closeCatModal() {
+  document.getElementById('catModal').classList.remove('open');
+}
+
+// ============================================================
+//  EXPORT TAB
+// ============================================================
+function renderExportTab() {
+  return `
+    <div class="page-header">
+      <h1>Export Data</h1>
+      <p>Download the updated data.js file and re-upload to Netlify to update your website.</p>
+    </div>
+    <div class="export-box">
+      <div class="export-icon">📤</div>
+      <h2>Export data.js</h2>
+      <p>After making changes to products or categories, export the updated <code>data.js</code> file. Then drag-and-drop your website folder into Netlify to publish the changes.</p>
+      <div class="export-steps">
+        <h4>📋 Steps to Update Website:</h4>
+        <ol>
+          <li>Click "Export data.js" below</li>
+          <li>Downloaded file will be saved to your Downloads folder</li>
+          <li>Go to <a href="https://app.netlify.com/drop" target="_blank">app.netlify.com/drop</a></li>
+          <li>Drag your entire <code>waterbear-website/</code> folder (with the new data.js) into Netlify</li>
+          <li>Wait ~10 seconds — your website is now updated!</li>
+        </ol>
+      </div>
+      <button class="export-btn" onclick="exportDataJS()">📥 Export data.js</button>
+    </div>
+  `;
+}
+
+function exportDataJS() {
+  if (!ADMIN_DATA) return;
+  const jsContent = `// data.js — Waterbear Tech product data file
+// How to use: edit this file, then re-upload to Netlify to update the website
+// Or use admin.html to edit visually and export this file.
+
+window.SITE_DATA = ${JSON.stringify(ADMIN_DATA, null, 2)
+    .replace(/"icon":/g, '  icon:')
+    .replace(/"id":/g, '  id:')
+    .replace(/"name":/g, '  name:')
+    .replace(/"color":/g, '  color:')
+    .replace(/"description":/g, '  description:')
+    .replace(/"sku":/g, '  sku:')
+    .replace(/"category":/g, '  category:')
+    .replace(/"specs":/g, '  specs:')
+    .replace(/"material":/g, '  material:')
+    .replace(/"finish":/g, '  finish:')
+    .replace(/"application":/g, '  application:')
+    .replace(/"shortName":/g, '  shortName:')
+    .replace(/"whatsapp":/g, '  whatsapp:')
+    .replace(/"email":/g, '  email:')
+    .replace(/"company":/g, 'company:')
+    .replace(/"categories":/g, '  categories:')
+    .replace(/"products":/g, '  products:')
+    .replace(/"SITE_DATA":/g, 'SITE_DATA:')
+  };
+`;
+  // Actually, let's just use clean JSON-to-JS-object conversion
+  const cleanJS = generateCleanJS(ADMIN_DATA);
+  
+  const blob = new Blob([cleanJS], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'data.js';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('data.js downloaded! Now upload to Netlify.');
+}
+
+function generateCleanJS(data) {
+  const catLines = data.categories.map(c => {
+    return `    {\n      id: "${c.id}",\n      name: "${c.name.replace(/"/g, '\\"')}", \n      icon: "${c.icon}",\n      color: "${c.color}",\n      description: "${c.description.replace(/"/g, '\\"')}"\n    }`;
+  }).join(',\n');
+
+  const prodLines = data.products.map(p => {
+    const specs = '[' + p.specs.map(s => `"${s.replace(/"/g, '\\"')}"`).join(', ') + ']';
+    return `    {\n      sku: "${p.sku}",\n      name: "${p.name.replace(/"/g, '\\"')}",\n      category: "${p.category}",\n      specs: ${specs},\n      material: "${p.material || ''}",\n      finish: "${p.finish || ''}",\n      application: "${(p.application || '').replace(/"/g, '\\"')}"\n    }`;
+  }).join(',\n');
+
+  return `// data.js — Waterbear Tech product data file
+// How to use: edit this file, then re-upload to Netlify to update the website
+// Or use admin.html to edit visually and export this file.
+
+window.SITE_DATA = {
+  company: {
+    name: "${data.company.name.replace(/"/g, '\\"')}",
+    shortName: "${data.company.shortName}",
+    whatsapp: "${data.company.whatsapp}",
+    email: "${data.company.email}"
+  },
+
+  categories: [
+${catLines}
+  ],
+
+  products: [
+${prodLines}
+  ]
+};
+`;
+}
+
+// ============================================================
+//  RENDER ALL
+// ============================================================
+function renderAll() {
+  const activeTab = document.querySelector('.sidebar-nav a.active')?.dataset.tab || 'dashboard';
+  renderTab(activeTab);
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+//  KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeProductModal();
+    closeCatModal();
+  }
+  if (e.key === 'Enter' && document.activeElement?.id === 'specInput') {
+    e.preventDefault();
+    addSpec();
+  }
+});
+</script>
+
+<!-- Load data.js BEFORE this script -->
+<script src="data.js"></script>
+</body>
+</html>
