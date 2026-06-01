@@ -24,6 +24,13 @@ window.SITE_DATA = {
       icon: "🌱",
       color: "#D4EDE2",
       description: "Eco-friendly products and green technology solutions for a sustainable future."
+    },
+    {
+      id: "home-decor",
+      name: "Home & Garden",
+      icon: "🏠",
+      color: "#FFF8E7",
+      description: "Decorative lighting, seasonal ornaments, and home accessories for indoor and outdoor ambiance."
     }
     // ADD NEW CATEGORIES HERE (copy the block above and edit):
     // {
@@ -117,6 +124,17 @@ window.SITE_DATA = {
       material: "Steel",
       finish: "Electroplated",
       application: "Furniture manufacturing, construction hardware"
+    },
+    // === HOME & GARDEN ===
+    {
+      sku: "WB-LED-BIRCH-60",
+      name: "LED Birch Tree Light",
+      category: "home-decor",
+      specs: ["60cm Height", "24 Warm White LEDs", "3×AA Battery + USB", "On/Off/Flash Mode"],
+      material: "Plastic + LED",
+      finish: "White Birch Bark Texture",
+      application: "Home decoration, holiday lighting, bedroom ambiance, gift shops, seasonal displays",
+      image: "images/products/WB-LED-BIRCH-60.png"
     }
     // ADD NEW PRODUCTS HERE (copy the block above and edit):
     // {
